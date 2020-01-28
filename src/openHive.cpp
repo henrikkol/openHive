@@ -1,5 +1,19 @@
 #include <Arduino.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <HX711.h>
 
+
+//Set your own wifi + mqtt broker here
+const char* ssid = "my_ssid";
+const char* password = "password";
+const char* mqtt_server = "server_ip_adress";
+const int mqtt_port = 1234;
+const char* mqtt_user = "mqtt_user";
+const char* mqtt_password = "mqtt_password";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
 
 #define uS_TO_S_FACTOR 1000000ULL /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP 60          /* Time ESP32 will go to sleep (in seconds) */
@@ -37,7 +51,15 @@ void readWeight(int stepCount)
 void setup()
 {
   Serial.begin(115200);
+  WiFi.begin(ssid, password);
   delay(1000); //Take some time to open up the Serial Monitor
+  Serial.println("connection to wifi..");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(10);
+    Serial.print(" ... ");
+  }
+  
 
   //Increment boot number and print it every reboot
   ++bootCount;
